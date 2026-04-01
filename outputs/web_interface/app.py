@@ -16,6 +16,16 @@ import threading
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from pathlib import Path
+import signal
+
+def _force_shutdown(signum, frame):
+    print("\n⚠️ Force quitting application to free ports...")
+    os._exit(0)
+
+signal.signal(signal.SIGINT, _force_shutdown)
+signal.signal(signal.SIGTERM, _force_shutdown)
+if hasattr(signal, 'SIGBREAK'):
+    signal.signal(signal.SIGBREAK, _force_shutdown)
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "perchance_pod_automation_secret"
@@ -545,4 +555,4 @@ if __name__ == "__main__":
     print(f"Pending: {len(get_pending_images())} images")
     print(f"Server: http://127.0.0.1:5001")
     print(f"{'='*60}\n")
-    app.run(host="0.0.0.0", port=5001, debug=False)
+    app.run(host="127.0.0.1", port=5001, debug=False)

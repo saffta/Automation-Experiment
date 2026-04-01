@@ -10,7 +10,9 @@ import base64
 import json
 import requests
 from pathlib import Path
+os.environ["LITELLM_TELEMETRY"] = "False"
 import litellm
+litellm.telemetry = False
 
 
 def _detect_environment():
