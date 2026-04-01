@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perchance POD Automation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .civitai-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .suggested-badge {
+            background: #f59e0b;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7em;
+            margin-left: 8px;
+        }
+
+        .metadata-section {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .metadata-section h4 {
+            margin: 0 0 8px 0;
+            color: #334155;
+            font-size: 0.9em;
+        }
+
+        .metadata-field {
+            margin-bottom: 8px;
+        }
+
+        .metadata-field label {
+            display: block;
+            font-weight: 600;
+            color: #64748b;
+            font-size: 0.8em;
+            margin-bottom: 4px;
+        }
+
+        .metadata-field input,
+        .metadata-field textarea {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .apply-suggested-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            margin-top: 8px;
+        }
+
+        .apply-suggested-btn:hover {
+            background: #059669;
+        }
+
+        .civitai-info {
+            background: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .civitai-info h4 {
+            margin: 0 0 8px 0;
+            color: #1e40af;
+            font-size: 0.9em;
+        }
+
+        .civitai-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            font-size: 0.85em;
+        }
+
+        .civitai-label {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .civitai-value {
+            color: #64748b;
+        }
+
+        /* Full Prompt Section */
+        .prompt-section {
+            background: #faf5f0;
+            border: 1px solid #fcd34d;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .prompt-section h4 {
+            margin: 0 0 8px 0;
+            color: #92400e;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toggle-prompt-btn {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8em;
+        }
+
+        .toggle-prompt-btn:hover {
+            background: #d97706;
+        }
+
+        .full-prompt {
+            display: none;
+            background: white;
+            border: 1px solid #fcd34d;
+            border-radius: 4px;
+            padding: 8px;
+            margin-top: 8px;
+            font-size: 0.85em;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .full-prompt.show {
+            display: block;
+        }
+
+        .prompt-stats {
+            font-size: 0.75em;
+            color: #78350f;
+            margin-top: 4px;
+        }
+
+        .tags-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .tag {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+        }
+
+        .settings-bar {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .settings-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .settings-group label {
+            font-size: 0.75em;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .platform-toggles {
+            display: flex;
+            gap: 12px;
+        }
+
+        .platform-toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+            transition: all 0.2s;
+        }
+
+        .platform-toggle.active {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            color: #1e40af;
+        }
+
+        .platform-toggle input {
+            display: none;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 24px;
+            border-radius: 12px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .close-modal {
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        .profile-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+
+        .profile-item {
+            padding: 10px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .profile-item:hover {
+            background: #f8fafc;
+        }
+
+        .profile-item.active {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            font-weight: bold;
+        }
+
+        .mapping-row {
+            background: #f1f5f9;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .credential-form {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+
+        .regeneration-section {
+            background: #fdf2f8;
+            border: 1px solid #f9a8d4;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .regeneration-section h4 {
+            margin: 0 0 8px 0;
+            color: #be185d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🎨 Perchance POD Automation</h1>
+            <p>Review and approve images for upload to POD platforms</p>
+        </header>
+
+        <div class="settings-bar">
+            <div class="settings-group">
+                <label>Active Profile</label>
+                <div style="display: flex; gap: 8px;">
+                    <select id="active-profile-select" class="form-input" style="padding: 6px; width: 150px;">
+                        <option value="default">Default</option>
+                    </select>
+                    <button class="btn" style="padding: 6px 12px; background: #64748b; color: white;"
+                        onclick="openProfileModal()">⚙️ Manage</button>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <label>Publish To</label>
+                <div id="platforms-container" style="display: flex; gap: 15px; align-items: center;">
+                    <div class="platform-item" style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="display: flex; align-items: center; gap: 6px; font-weight: 500; cursor: pointer;">
+                            <input type="checkbox" id="toggle-redbubble" checked onchange="updatePlatformToggle(this, 'redbubble')"> 
+                            <span>Redbubble</span>
+                        </label>
+                        <label id="headless-rb-container" style="display: flex; align-items: center; gap: 6px; font-size: 0.8em; color: #64748b; margin-left: 20px; cursor: pointer;">
+                            <input type="checkbox" id="headless-rb" checked onchange="saveHeadlessStates()" style="width: 14px; height: 14px;"> 
+                            <span>Headless</span>
+                        </label>
+                    </div>
+                    
+                    <div class="platform-item" style="display: flex; flex-direction: column; gap: 4px;">
+                        <label style="display: flex; align-items: center; gap: 6px; font-weight: 500; cursor: pointer;">
+                            <input type="checkbox" id="toggle-teepublic" checked onchange="updatePlatformToggle(this, 'teepublic')"> 
+                            <span>TeePublic</span>
+                        </label>
+                        <label id="headless-tp-container" style="display: flex; align-items: center; gap: 6px; font-size: 0.8em; color: #64748b; margin-left: 20px; cursor: pointer;">
+                            <input type="checkbox" id="headless-tp" checked onchange="saveHeadlessStates()" style="width: 14px; height: 14px;"> 
+                            <span>Headless</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-group" style="flex: 1;">
+                <label>Custom Browser Profile Path (Optional)</label>
+                <input type="text" id="profile-path-input" class="form-input" style="padding: 6px;"
+                    placeholder="e.g. E:\Github-Projects\Redbubble-Bot">
+            </div>
+
+            <div class="settings-group" style="border-left: 1px solid #e2e8f0; padding-left: 20px;">
+                <label>🚀 Civitai Scrubbing</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <select id="scrape-profile-select" class="form-input" style="padding: 6px; width: 140px;">
+                        <option value="">-- Profile --</option>
+                    </select>
+                    <button class="btn" style="padding: 6px 10px; background: #64748b; color: white; font-size: 0.85em;"
+                        onclick="openGenProfileModal()">⚙️</button>
+                    <input type="number" id="scrape-num-images" class="form-input" value="5" min="1" max="50" style="padding: 6px; width: 60px;">
+                    <button id="start-scrape-btn" class="btn btn-approve" style="padding: 6px 12px; background: #2563eb;" onclick="startScraping()">Start</button>
+                </div>
+            </div>
+
+            <div class="settings-group" style="border-left: 1px solid #e2e8f0; padding-left: 20px;">
+                <label>👁️ Vision AI Config</label>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button class="btn" style="padding: 6px 10px; background: #8b5cf6; color: white; font-size: 0.85em;" onclick="openVisionConfigModal()">⚙️ Settings</button>
+                </div>
+            </div>
+
+            <div class="stats" style="margin-left: auto;">
+                <span id="pending-count" style="font-weight: bold; font-size: 1.1em; color: #1e293b;">Pending: 0</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="refresh-btn" onclick="loadImages()">
+                🔄 Refresh Images
+            </div>
+        </div>
+
+        <div id="images-container" class="images-grid">
+            {% if images %}
+            {% for image in images %}
+            <div class="image-card" data-filename="{{ image.filename }}">
+                <div class="image-preview">
+                    <img src="{{ image.url }}" alt="{{ image.filename }}">
+                    <div class="image-info">
+                        <span class="filename">{{ image.filename }}</span>
+                        <span class="timestamp">{{ image.timestamp|timestamp_to_date }}</span>
+                    </div>
+                </div>
+
+                <!-- CivitAI Source Badge -->
+                {% if image.civitai_data %}
+                <div class="civitai-badge">
+                    🌐 CivitAI Source
+                    <span class="suggested-badge">Auto-Suggested</span>
+                </div>
+                {% endif %}
+
+                <!-- CivitAI Info Section -->
+                {% if image.civitai_data %}
+                <div class="civitai-info">
+                    <h4>📊 Source Information</h4>
+                    <div class="civitai-row">
+                        <span class="civitai-label">Model:</span>
+                        <span class="civitai-value">{{ image.civitai_data.base_model or 'Unknown' }}</span>
+                    </div>
+                    {% if image.civitai_data.model_id %}
+                    <div class="civitai-row">
+                        <span class="civitai-label">Model ID:</span>
+                        <span class="civitai-value">{{ image.civitai_data.model_id }}</span>
+                    </div>
+                    {% endif %}
+                    {% if image.civitai_data.reactions_per_day %}
+                    <div class="civitai-row">
+                        <span class="civitai-label">Reactions/Day:</span>
+                        <span class="civitai-value">{{ image.civitai_data.reactions_per_day }}</span>
+                    </div>
+                    {% endif %}
+                    {% if image.civitai_data.likes %}
+                    <div class="civitai-row">
+                        <span class="civitai-label">Likes:</span>
+                        <span class="civitai-value">{{ image.civitai_data.likes }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="civitai-row">
+                        <span class="civitai-label">Creator:</span>
+                        <span class="civitai-value">{{ image.civitai_data.creator_name or 'Unknown' }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Full Prompt Section -->
+                {% if image.civitai_data and image.civitai_data.prompt %}
+                <div class="prompt-section">
+                    <h4>
+                        📜 Original Prompt
+                        <button class="toggle-prompt-btn" onclick="togglePrompt('{{ image.filename }}')">
+                            ▼ Show/Hide
+                        </button>
+                    </h4>
+                    <div id="prompt-{{ image.filename }}" class="full-prompt">
+                        {{ image.civitai_data.prompt }}
+                    </div>
+                    <div class="prompt-stats">
+                        Length: {{ image.civitai_data.prompt|length }} characters
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Suggested Metadata Section -->
+                <div class="metadata-section">
+                    <h4>💡 Suggested Metadata</h4>
+
+                    <div class="metadata-field">
+                        <label for="title-{{ image.filename }}">Title</label>
+                        <input type="text" id="title-{{ image.filename }}" class="form-input"
+                            value="{{ image.metadata.title or '' }}" placeholder="Enter title...">
+                    </div>
+
+                    <div class="metadata-field">
+                        <label for="primary-tag-{{ image.filename }}">Primary Tag (Main Subject)</label>
+                        <input type="text" id="primary-tag-{{ image.filename }}" class="form-input"
+                            value="{{ image.metadata.primary_tag or '' }}"
+                            placeholder="e.g. vintage car, cyberpunk city...">
+                    </div>
+
+                    <div class="metadata-field">
+                        <label for="description-{{ image.filename }}">Description</label>
+                        <textarea id="description-{{ image.filename }}" class="form-input" rows="4"
+                            placeholder="Enter description...">{{ image.metadata.description or '' }}</textarea>
+                    </div>
+
+                    <div class="metadata-field">
+                        <label for="tags-{{ image.filename }}">Tags (comma-separated)</label>
+                        <input type="text" id="tags-{{ image.filename }}" class="form-input"
+                            value="{{ image.metadata.tags|join(', ') if image.metadata.tags else '' }}"
+                            placeholder="anime, digital art, beautiful...">
+                        {% if image.metadata.tags and image.metadata.tags|length > 0 %}
+                        <div class="tags-list">
+                            {% for tag in image.metadata.tags %}
+                            <span class="tag">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Vision AI Generation Button -->
+                    <button class="apply-suggested-btn" style="background: #7c3aed;"
+                        onclick="generateVisionDescription('{{ image.filename }}')">
+                        🤖 AI Generate Description
+                    </button>
+
+                    {% if image.metadata.suggested %}
+                    <button class="apply-suggested-btn" onclick="applySuggested('{{ image.filename }}')">
+                        ✅ Apply Suggested Metadata
+                    </button>
+                    {% endif %}
+                </div>
+
+                <!-- Regeneration Section -->
+                <div class="regeneration-section">
+                    <h4>🔄 Regenerate Image</h4>
+                    <div class="metadata-field">
+                        <label>Generation Profile</label>
+                        <select id="gen-profile-{{ image.filename }}" class="form-input">
+                            <option value="">-- Select Profile --</option>
+                        </select>
+                    </div>
+                    <button class="apply-suggested-btn" style="background: #db2777;"
+                        onclick="regenerateImage('{{ image.filename }}')">
+                        ✨ Regenerate with Profile
+                    </button>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-favorite" onclick="toggleFavorite('{{ image.filename }}')">
+                        ⭐ Favorite
+                    </button>
+                    <button class="btn btn-approve" onclick="approveImage('{{ image.filename }}')">
+                        ✅ Approve & Upload
+                    </button>
+                    <button class="btn btn-deny" onclick="denyImage('{{ image.filename }}')">
+                        ❌ Deny & Delete
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <p>No pending images found.</p>
+                <p>Generate some images first using the orchestrator!</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <footer>
+            <p>Perchance POD Automation | Human-in-the-Loop Workflow</p>
+        </footer>
+    </div>
+
+    <!-- Profile Management Modal -->
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>👥 Profile & Credential Manager</h3>
+                <span class="close-modal" onclick="closeProfileModal()">&times;</span>
+            </div>
+
+            <div class="settings-group">
+                <label>Existing Profiles</label>
+                <div id="profile-list" class="profile-list">
+                    <!-- Profiles added here via JS -->
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <label>📂 Available Models (Reference)</label>
+                <div id="models-list-display" style="background: #f8fafc; padding: 10px; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 0.85em; max-height: 150px; overflow-y: auto; color: #475569;">
+                    Loading models...
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-bottom: 24px;">
+                <input type="text" id="new-profile-name" class="form-input" placeholder="New profile name...">
+                <button class="btn btn-approve" style="padding: 6px 12px;" onclick="addProfile()">Add Profile</button>
+            </div>
+
+            <div class="credential-form">
+                <h4>🔑 Update Credentials</h4>
+                <div style="display: flex; gap: 12px; margin-bottom: 8px;">
+                    <div class="settings-group" style="flex: 1;">
+                        <label>Platform</label>
+                        <select id="cred-platform" class="form-input">
+                            <option value="redbubble">Redbubble</option>
+                            <option value="teepublic">TeePublic</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="metadata-field">
+                    <label>Email / Username</label>
+                    <input type="text" id="cred-username" class="form-input">
+                </div>
+                <div class="metadata-field">
+                    <label>Password</label>
+                    <input type="password" id="cred-password" class="form-input">
+                </div>
+                <button class="btn btn-approve" style="width: 100%; margin-top: 8px;" onclick="updateCredentials()">💾
+                    Save Credentials</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generation Profile Management Modal -->
+    <div id="gen-profile-modal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>⚙️ Generation Profile Manager</h3>
+                <span class="close-modal" onclick="closeGenProfileModal()">&times;</span>
+            </div>
+
+            <div style="display: flex; gap: 20px;">
+                <!-- Sidebar: Profile List -->
+                <div style="flex: 1; border-right: 1px solid #e2e8f0; padding-right: 20px;">
+                    <label style="font-weight: bold; display: block; margin-bottom: 8px;">Profiles</label>
+                    <div id="gen-profile-list" class="profile-list" style="max-height: 400px; overflow-y: auto;">
+                        <!-- Profiles added here via JS -->
+                    </div>
+                    <div style="margin-top: 16px;">
+                        <input type="text" id="new-gen-profile-name" class="form-input" style="margin-bottom: 8px;" placeholder="New Profile Name...">
+                        <button class="btn btn-approve" style="width: 100%;" onclick="createNewGenProfile()">➕ New Profile</button>
+                    </div>
+                </div>
+
+                <!-- Main Content: Profile Editor -->
+                <div id="gen-profile-editor" style="flex: 2; display: none;">
+                    <h4 id="editing-gen-profile-name" style="margin-top: 0; color: #2563eb;">Editing Profile</h4>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                        <div class="metadata-field">
+                            <label>Backend</label>
+                            <select id="edit-gen-backend" class="form-input">
+                                <option value="perchance">Perchance</option>
+                                <option value="swarmui">SwarmUI</option>
+                            </select>
+                        </div>
+                        <div class="metadata-field">
+                            <label>Default Model</label>
+                            <input type="text" id="edit-gen-model" class="form-input" list="available-models-list">
+                            <datalist id="available-models-list"></datalist>
+                        </div>
+                        <div class="metadata-field">
+                            <label>Width</label>
+                            <input type="number" id="edit-gen-width" class="form-input" value="1024">
+                        </div>
+                        <div class="metadata-field">
+                            <label>Height</label>
+                            <input type="number" id="edit-gen-height" class="form-input" value="1024">
+                        </div>
+                        <div class="metadata-field">
+                            <label>CFG Scale</label>
+                            <input type="number" id="edit-gen-cfg" class="form-input" value="7">
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+                        <label style="font-weight: bold; display: block; margin-bottom: 8px;">🎯 Base Model Mapping (Civitai → Local)</label>
+                        <p style="font-size: 0.8em; color: #64748b; margin-bottom: 12px;">Map CivitAI base models (e.g. "Flux", "SDXL", "Pony") to specific local models.</p>
+                        
+                        <div id="base-model-mapping-container" style="margin-bottom: 12px; max-height: 150px; overflow-y: auto;">
+                            <!-- Mappings added here via JS -->
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="new-mapping-key" class="form-input" style="flex: 1;" placeholder="Civitai Base (e.g. SDXL)">
+                            <input type="text" id="new-mapping-val" class="form-input" style="flex: 2;" placeholder="Local Model" list="available-models-list">
+                            <button class="btn" style="background: #10b981; color: white; padding: 6px 12px;" onclick="addMappingRow()">Add</button>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 32px; display: flex; gap: 12px;">
+                        <button class="btn btn-approve" style="flex: 1;" onclick="saveGenProfile()">💾 Save Profile</button>
+                        <button class="btn btn-deny" style="padding: 6px 16px;" onclick="deleteGenProfile()">Delete</button>
+                    </div>
+                </div>
+                
+                <div id="gen-profile-empty-hint" style="flex: 2; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-style: italic; text-align: center;">
+                    Select or create a profile to edit settings.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vision Config Management Modal -->
+    <div id="vision-config-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>👁️ Vision API Configuration</h3>
+                <span class="close-modal" onclick="closeVisionConfigModal()">&times;</span>
+            </div>
+            <p style="font-size: 0.85em; color: #64748b; margin-bottom: 16px;">These settings are saved locally in your browser to authorize AI Image descriptions.</p>
+            
+            <div class="settings-group" style="margin-bottom: 12px;">
+                <label>Provider</label>
+                <select id="vision-provider" class="form-input" style="padding: 8px;" onchange="updateVisionConfigVisibility()">
+                    <option value="ollama">Local (Ollama)</option>
+                    <option value="openai">Cloud (Z.AI / OpenAI / Custom)</option>
+                </select>
+            </div>
+            
+            <div class="settings-group" style="margin-bottom: 12px;">
+                <label>Model Name</label>
+                <input type="text" id="vision-model" class="form-input" placeholder="e.g. llava or gpt-4o">
+            </div>
+            
+            <div id="vision-cloud-fields" style="display: none;">
+                <div class="settings-group" style="margin-bottom: 12px;">
+                    <label>API Key</label>
+                    <input type="password" id="vision-api-key" class="form-input" placeholder="sk-...">
+                </div>
+                
+                <div class="settings-group" style="margin-bottom: 12px;">
+                    <label>API Base URL (Optional)</label>
+                    <input type="text" id="vision-api-base" class="form-input" placeholder="https://api.openai.com/v1">
+                </div>
+            </div>
+            
+            <button class="btn btn-approve" style="width: 100%; margin-top: 16px; padding: 10px;" onclick="saveVisionConfig()">💾 Save Config</button>
+        </div>
+    </div>
+
+    <script>
+        // Global state for platforms
+        let selectedPlatforms = ['redbubble', 'teepublic'];
+
+        let generationProfiles = {};
+        let currentEditingProfileMatch = null;
+
+        function openGenProfileModal() {
+            document.getElementById('gen-profile-modal').style.display = 'block';
+            refreshGenProfileList();
+            loadAvailableModels(); // Ensure model list is up to date for datalist
+        }
+
+        function closeGenProfileModal() {
+            document.getElementById('gen-profile-modal').style.display = 'none';
+        }
+
+        async function refreshGenProfileList() {
+            try {
+                const response = await fetch('/api/generation-profiles');
+                const data = await response.json();
+                generationProfiles = data.profiles;
+                
+                const list = document.getElementById('gen-profile-list');
+                list.innerHTML = '';
+                
+                data.names.forEach(name => {
+                    const item = document.createElement('div');
+                    item.className = 'profile-item';
+                    item.textContent = name;
+                    item.onclick = () => selectGenProfile(name);
+                    if (currentEditingProfileMatch === name) item.classList.add('active');
+                    list.appendChild(item);
+                });
+                
+                // Refresh use of profiles in other selects
+                loadGenerationProfiles();
+            } catch (err) { console.error(err); }
+        }
+
+        function selectGenProfile(name) {
+            currentEditingProfileMatch = name;
+            const profile = generationProfiles[name];
+            
+            document.getElementById('gen-profile-list').querySelectorAll('.profile-item').forEach(el => {
+                el.classList.toggle('active', el.textContent === name);
+            });
+            
+            document.getElementById('editing-gen-profile-name').textContent = `Editing: ${name}`;
+            document.getElementById('edit-gen-backend').value = profile.backend || 'perchance';
+            document.getElementById('edit-gen-model').value = profile.model || '';
+            document.getElementById('edit-gen-width').value = profile.width || 1024;
+            document.getElementById('edit-gen-height').value = profile.height || 1024;
+            document.getElementById('edit-gen-cfg').value = profile.cfg_scale || 7;
+            
+            // Clear and load mappings
+            const mappingContainer = document.getElementById('base-model-mapping-container');
+            mappingContainer.innerHTML = '';
+            if (profile.base_model_map) {
+                Object.entries(profile.base_model_map).forEach(([key, val]) => {
+                    addMappingRow(key, val);
+                });
+            }
+            
+            document.getElementById('gen-profile-editor').style.display = 'block';
+            document.getElementById('gen-profile-empty-hint').style.display = 'none';
+        }
+
+        function addMappingRow(key = '', val = '') {
+            const container = document.getElementById('base-model-mapping-container');
+            const row = document.createElement('div');
+            row.className = 'mapping-row';
+            row.style = 'display: flex; gap: 8px; margin-bottom: 8px; align-items: center;';
+            row.innerHTML = `
+                <input type="text" class="form-input mapping-key" style="flex: 1;" value="${key}" placeholder="Civitai Base">
+                <input type="text" class="form-input mapping-val" style="flex: 2;" value="${val}" placeholder="Local Model" list="available-models-list">
+                <button class="btn" style="background: #ef4444; color: white; padding: 4px 8px;" onclick="this.parentElement.remove()">✕</button>
+            `;
+            container.appendChild(row);
+        }
+
+        async function createNewGenProfile() {
+            const name = document.getElementById('new-gen-profile-name').value.trim();
+            if (!name) return alert('Please enter a profile name.');
+            
+            const config = {
+                backend: 'perchance',
+                model: 'flux',
+                width: 1024,
+                height: 1024,
+                cfg_scale: 7
+            };
+            
+            try {
+                const response = await fetch('/api/generation-profiles/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, config })
+                });
+                if (response.ok) {
+                    document.getElementById('new-gen-profile-name').value = '';
+                    await refreshGenProfileList();
+                    selectGenProfile(name);
+                }
+            } catch (err) { alert(err.message); }
+        }
+
+        async function saveGenProfile() {
+            if (!currentEditingProfileMatch) return;
+            
+            const mappingRows = document.querySelectorAll('#base-model-mapping-container .mapping-row');
+            const base_model_map = {};
+            mappingRows.forEach(row => {
+                const key = row.querySelector('.mapping-key').value.trim();
+                const val = row.querySelector('.mapping-val').value.trim();
+                if (key && val) base_model_map[key] = val;
+            });
+            
+            const config = {
+                backend: document.getElementById('edit-gen-backend').value,
+                model: document.getElementById('edit-gen-model').value,
+                width: parseInt(document.getElementById('edit-gen-width').value),
+                height: parseInt(document.getElementById('edit-gen-height').value),
+                cfg_scale: parseInt(document.getElementById('edit-gen-cfg').value),
+                base_model_map: base_model_map
+            };
+            
+            try {
+                const response = await fetch('/api/generation-profiles/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: currentEditingProfileMatch, config })
+                });
+                if (response.ok) {
+                    alert('✅ Profile saved!');
+                    refreshGenProfileList();
+                }
+            } catch (err) { alert(err.message); }
+        }
+
+        async function deleteGenProfile() {
+            if (!currentEditingProfileMatch) return;
+            if (!confirm(`Are you sure you want to delete profile "${currentEditingProfileMatch}"?`)) return;
+            
+            try {
+                const response = await fetch('/api/generation-profiles/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: currentEditingProfileMatch })
+                });
+                if (response.ok) {
+                    currentEditingProfileMatch = null;
+                    document.getElementById('gen-profile-editor').style.display = 'none';
+                    document.getElementById('gen-profile-empty-hint').style.display = 'flex';
+                    refreshGenProfileList();
+                }
+            } catch (err) { alert(err.message); }
+        }
+
+        function updatePlatformToggle(checkbox, platform) {
+            if (checkbox.checked) {
+                if (!selectedPlatforms.includes(platform)) {
+                    selectedPlatforms.push(platform);
+                }
+                // Show the specific headless toggle when platform is selected
+                if (platform === 'redbubble') document.getElementById('headless-rb-container').style.opacity = '1';
+                if (platform === 'teepublic') document.getElementById('headless-tp-container').style.opacity = '1';
+            } else {
+                selectedPlatforms = selectedPlatforms.filter(p => p !== platform);
+                // Hide or gray out the specific headless toggle when platform is unselected
+                if (platform === 'redbubble') document.getElementById('headless-rb-container').style.opacity = '0.3';
+                if (platform === 'teepublic') document.getElementById('headless-tp-container').style.opacity = '0.3';
+            }
+            localStorage.setItem('selectedPlatforms', JSON.stringify(selectedPlatforms));
+            console.log('Selected platforms:', selectedPlatforms);
+        }
+
+        function saveHeadlessStates() {
+            const rbState = document.getElementById('headless-rb').checked;
+            const tpState = document.getElementById('headless-tp').checked;
+            localStorage.setItem('headless_rb', rbState);
+            localStorage.setItem('headless_tp', tpState);
+        }
+
+        function loadHeadlessStates() {
+            const rbState = localStorage.getItem('headless_rb');
+            const tpState = localStorage.getItem('headless_tp');
+            
+            if (rbState !== null) document.getElementById('headless-rb').checked = rbState === 'true';
+            if (tpState !== null) document.getElementById('headless-tp').checked = tpState === 'true';
+            
+            // Sync initial opacity
+            if (!selectedPlatforms.includes('redbubble')) document.getElementById('headless-rb-container').style.opacity = '0.3';
+            if (!selectedPlatforms.includes('teepublic')) document.getElementById('headless-tp-container').style.opacity = '0.3';
+        }
+
+        async function loadProfiles() {
+            loadAvailableModels();
+            try {
+                const response = await fetch('/api/profiles');
+                const data = await response.json();
+                const select = document.getElementById('active-profile-select');
+                const list = document.getElementById('profile-list');
+
+                select.innerHTML = '';
+                list.innerHTML = '';
+
+                data.profiles.forEach(p => {
+                    // Update dropdown
+                    const opt = document.createElement('option');
+                    opt.value = p;
+                    opt.textContent = p;
+                    if (p === data.active) opt.selected = true;
+                    select.appendChild(opt);
+
+                    // Update list in modal
+                    const item = document.createElement('div');
+                    item.className = 'profile-item';
+                    item.innerHTML = `
+                        <span>${p === data.active ? '🎯 ' : ''}${p}</span>
+                        ${p !== 'default' ? `<button onclick="deleteProfile('${p}')" style="background:none; border:none; cursor:pointer;">🗑️</button>` : ''}
+                    `;
+                    list.appendChild(item);
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        function openProfileModal() {
+            document.getElementById('profile-modal').style.display = 'block';
+            loadProfiles();
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profile-modal').style.display = 'none';
+        }
+
+        async function addProfile() {
+            const name = document.getElementById('new-profile-name').value.trim();
+            if (!name) return;
+            await fetch('/api/profiles/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            document.getElementById('new-profile-name').value = '';
+            loadProfiles();
+        }
+
+        async function updateCredentials() {
+            const profile = document.getElementById('active-profile-select').value;
+            const platform = document.getElementById('cred-platform').value;
+            const username = document.getElementById('cred-username').value;
+            const password = document.getElementById('cred-password').value;
+
+            if (!username || !password) return alert('Username and password required');
+
+            const res = await fetch('/api/accounts/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ profile, platform, username, password })
+            });
+
+            if (res.ok) {
+                alert('✅ Credentials updated!');
+                document.getElementById('cred-password').value = '';
+            }
+        }
+
+        async function loadAvailableModels() {
+            const display = document.getElementById('models-list-display');
+            const datalist = document.getElementById('available-models-list');
+            if (!display || !datalist) return;
+            
+            try {
+                const response = await fetch('/api/models');
+                const data = await response.json();
+                
+                let html = '<div><strong>Perchance:</strong> ' + (data.perchance || []).join(', ') + '</div>';
+                if (data.swarmui && data.swarmui.length > 0) {
+                    html += '<div style="margin-top:5px;"><strong>SwarmUI:</strong><ul style="margin:2px 0; padding-left:15px;">';
+                    data.swarmui.slice(0, 20).forEach(m => {
+                        html += `<li>${m}</li>`;
+                    });
+                    if (data.swarmui.length > 20) html += `<li>...and ${data.swarmui.length - 20} more</li>`;
+                    html += '</ul></div>';
+                } else {
+                    html += '<div style="margin-top:5px;"><strong>SwarmUI:</strong> <span style="color:#94a3b8;">None found (check connection)</span></div>';
+                }
+                display.innerHTML = html;
+
+                // Populate datalist for auto-complete
+                datalist.innerHTML = '';
+                const allModels = [...(data.perchance || []), ...(data.swarmui || [])];
+                const uniqueModels = [...new Set(allModels)];
+                uniqueModels.sort().forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m;
+                    datalist.appendChild(opt);
+                });
+            } catch (err) {
+                display.innerHTML = `<span style="color:#ef4444;">Error: ${err.message}</span>`;
+            }
+        }
+
+        // Initialize state on load
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedPlatforms = localStorage.getItem('selectedPlatforms');
+            if (savedPlatforms) {
+                selectedPlatforms = JSON.parse(savedPlatforms);
+                // Update checkboxes
+                document.getElementById('toggle-redbubble').checked = selectedPlatforms.includes('redbubble');
+                document.getElementById('toggle-teepublic').checked = selectedPlatforms.includes('teepublic');
+            }
+            loadHeadlessStates();
+            loadImages();
+            loadProfiles();
+            loadGenerationProfiles();
+        });
+
+        async function loadImages() {
+            try {
+                const response = await fetch('/api/images');
+                const data = await response.json();
+                document.getElementById('pending-count').textContent = `Pending: ${data.images.length}`;
+            } catch (error) {
+                console.error('Error loading images:', error);
+            }
+        }
+
+        function togglePrompt(filename) {
+            const promptDiv = document.getElementById(`prompt-${filename}`);
+            const btn = promptDiv.parentElement.querySelector('.toggle-prompt-btn');
+            if (promptDiv.classList.contains('show')) {
+                promptDiv.classList.remove('show');
+                btn.textContent = '▼ Show';
+            } else {
+                promptDiv.classList.add('show');
+                btn.textContent = '▲ Hide';
+            }
+        }
+
+        async function approveImage(filename) {
+            const title = document.getElementById(`title-${filename}`).value;
+            const primary_tag = document.getElementById(`primary-tag-${filename}`).value;
+            const description = document.getElementById(`description-${filename}`).value;
+            const tagsInput = document.getElementById(`tags-${filename}`).value;
+            const tags = tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag);
+            const profile = document.getElementById('active-profile-select').value;
+            const headless_rb = document.getElementById('headless-rb').checked;
+            const headless_tp = document.getElementById('headless-tp').checked;
+            const profile_path = document.getElementById('profile-path-input').value.trim();
+            
+            const visionConfig = {
+                provider: localStorage.getItem('vision_provider'),
+                model: localStorage.getItem('vision_model'),
+                api_key: localStorage.getItem('vision_api_key'),
+                api_base: localStorage.getItem('vision_api_base')
+            };
+
+            try {
+                const response = await fetch(`/api/image/${filename}/approve`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        title, 
+                        primary_tag, 
+                        description, 
+                        tags, 
+                        platforms: selectedPlatforms, 
+                        profile, 
+                        headless_redbubble: headless_rb,
+                        headless_teepublic: headless_tp,
+                        profile_path,
+                        vision_config: visionConfig
+                    })
+                });
+
+                if (response.ok) {
+                    alert('✅ Image approved and ready for upload!');
+                    location.reload(); // Refresh to remove the card
+                } else {
+                    const error = await response.json();
+                    alert(`❌ Error: ${error.error}`);
+                }
+            } catch (error) { alert(`❌ Error: ${error.message}`); }
+        }
+
+        async function denyImage(filename) {
+            if (!confirm('Are you sure you want to deny and delete this image?')) return;
+            try {
+                const response = await fetch(`/api/image/${filename}/deny`, { method: 'POST' });
+                if (response.ok) {
+                    alert('🗑️ Image deleted.');
+                    location.reload();
+                }
+            } catch (err) { alert(err.message); }
+        }
+
+        async function toggleFavorite(filename) {
+            try {
+                const response = await fetch(`/api/image/${filename}/favorite`, { method: 'POST' });
+                if (response.ok) alert('⭐ Added to favorites!');
+            } catch (err) { alert(err.message); }
+        }
+
+        async function generateVisionDescription(filename) {
+            const provider = localStorage.getItem('vision_provider') || 'ollama';
+            const model = localStorage.getItem('vision_model') || 'llava';
+            const api_key = localStorage.getItem('vision_api_key') || '';
+            const api_base = localStorage.getItem('vision_api_base') || '';
+
+            const btn = document.querySelector(`button[onclick="generateVisionDescription('${filename}')"]`);
+            const originalText = btn.textContent;
+            btn.textContent = '🤖 Thinking...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/api/image/${filename}/generate_description`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ provider, model, api_key, api_base })
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById(`title-${filename}`).value = data.title || '';
+                    document.getElementById(`primary-tag-${filename}`).value = data.primary_tag || '';
+                    document.getElementById(`description-${filename}`).value = data.description || '';
+                    document.getElementById(`tags-${filename}`).value = (data.tags || []).join(', ');
+                    alert('✅ AI Description Generated!');
+                } else {
+                    const error = await response.json();
+                    alert(`❌ Error: ${error.error}`);
+                }
+            } catch (error) { alert(`❌ Error: ${error.message}`); }
+            finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function loadGenerationProfiles() {
+            try {
+                const response = await fetch('/api/generation-profiles');
+                const data = await response.json();
+                const selects = document.querySelectorAll('select[id^="gen-profile-"], select#scrape-profile-select');
+                selects.forEach(select => {
+                    const currentVal = select.value;
+                    select.innerHTML = '<option value="">-- Profile --</option>';
+                    data.names.forEach(name => {
+                        const opt = document.createElement('option');
+                        opt.value = name;
+                        opt.textContent = name;
+                        select.appendChild(opt);
+                    });
+                    select.value = currentVal;
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        async function startScraping() {
+            const profile = document.getElementById('scrape-profile-select').value;
+            const numImages = document.getElementById('scrape-num-images').value;
+            if (!profile) return alert('Please select a profile for scraping.');
+            
+            const btn = document.getElementById('start-scrape-btn');
+            const originalText = btn.textContent;
+            btn.textContent = '⌛ Starting...';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/scrape/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profile, num_images: numImages })
+                });
+                if (response.ok) alert('🚀 Scraping started!');
+                else alert('❌ Failed to start scraping.');
+            } catch (err) { alert(err.message); }
+            finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function regenerateImage(filename) {
+            const profile = document.getElementById(`gen-profile-${filename}`).value;
+            if (!profile) return alert('Please select a generation profile.');
+            const btn = document.querySelector(`button[onclick="regenerateImage('${filename}')"]`);
+            const originalText = btn.textContent;
+            btn.textContent = '⏳ Regenerating...';
+            btn.disabled = true;
+            try {
+                const response = await fetch(`/api/image/${filename}/regenerate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ profile })
+                });
+                if (response.ok) {
+                    alert('✅ Image regenerated!');
+                    const img = document.querySelector(`[data-filename="${filename}"] img`);
+                    img.src = `${img.src.split('?')[0]}?t=${new Date().getTime()}`;
+                } else alert('❌ Regeneration failed.');
+            } catch (err) { alert(err.message); }
+            finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Vision Modal Configuration Functions
+        function openVisionConfigModal() {
+            document.getElementById('vision-config-modal').style.display = 'block';
+            
+            document.getElementById('vision-provider').value = localStorage.getItem('vision_provider') || 'ollama';
+            document.getElementById('vision-model').value = localStorage.getItem('vision_model') || 'llava';
+            document.getElementById('vision-api-key').value = localStorage.getItem('vision_api_key') || '';
+            document.getElementById('vision-api-base').value = localStorage.getItem('vision_api_base') || '';
+            
+            updateVisionConfigVisibility();
+        }
+
+        function closeVisionConfigModal() {
+            document.getElementById('vision-config-modal').style.display = 'none';
+        }
+
+        function updateVisionConfigVisibility() {
+            const provider = document.getElementById('vision-provider').value;
+            document.getElementById('vision-cloud-fields').style.display = (provider === 'openai') ? 'block' : 'none';
+        }
+
+        function saveVisionConfig() {
+            localStorage.setItem('vision_provider', document.getElementById('vision-provider').value);
+            localStorage.setItem('vision_model', document.getElementById('vision-model').value);
+            localStorage.setItem('vision_api_key', document.getElementById('vision-api-key').value);
+            localStorage.setItem('vision_api_base', document.getElementById('vision-api-base').value);
+            
+            alert('✅ Vision Config Saved!');
+            closeVisionConfigModal();
+        }
+    </script>
+</body>
+
+</html>

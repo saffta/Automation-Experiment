@@ -1,0 +1,10 @@
+{
+  "api_key": "",
+  "api_base": "https://api.z.ai/api/coding/paas/v4",
+  "model": "GLM-4.6V",
+  "timeout": 30,
+  "max_tags": 10,
+  "ollama_fallback_enabled": true,
+  "ollama_vision_model": "hf.co/unsloth/GLM-4.6V-Flash-GGUF:UD-Q4_K_XL",
+  "prefer_ollama": true
+}

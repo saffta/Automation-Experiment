@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perchance POD - Favorites</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⭐ Perchance POD Favorites</h1>
+            <p>Your favorite images for future POD uploads</p>
+        </header>
+
+        <div class="controls">
+            <a href="{{ url_for('index') }}" class="refresh-btn">
+                ← Back to Pending
+            </a>
+            <div class="stats">
+                <span id="favorites-count">Favorites: {{ images|length }}</span>
+            </div>
+        </div>
+
+        <div class="images-grid">
+            {% if images %}
+                {% for image in images %}
+                <div class="image-card">
+                    <div class="image-preview">
+                        <img src="{{ image.url }}" alt="{{ image.filename }}">
+                        <div class="image-info">
+                            <span class="filename">{{ image.filename }}</span>
+                            <span class="timestamp">{{ image.timestamp|timestamp_to_date }}</span>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-favorite" onclick="unfavorite('{{ image.filename }}')">
+                            ⭐ Remove from Favorites
+                        </button>
+                        <a href="{{ url_for('index') }}" class="btn btn-approve" style="flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+                            ✅ Use in Upload
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>No favorites yet.</p>
+                    <p>Go to the main page and star your favorite images!</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <footer>
+            <p>Perchance POD Automation | Human-in-the-Loop Workflow</p>
+        </footer>
+    </div>
+
+    <script>
+        async function unfavorite(filename) {
+            if (!confirm('Remove this image from favorites?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/image/${filename}/unfavorite`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    alert('⭐ Favorite removed.');
+                    location.reload();
+                } else {
+                    const error = await response.json();
+                    alert(`❌ Error: ${error.error}`);
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        function timestampToDate(timestamp) {
+            const date = new Date(timestamp * 1000);
+            return date.toLocaleString();
+        }
+    </script>
+</body>
+</html>
