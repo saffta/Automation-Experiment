@@ -280,3 +280,11 @@ out
 /tmp/
 .a0proj/
 *cookies.json
+
+# Ignore Botasaurus generated directories anywhere in the repository
+**/profiles/
+**/output/
+
+# Ignore generated automation outputs
+/outputs/images/
+/outputs/metadata/

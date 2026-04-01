@@ -372,7 +372,6 @@ def get_upload_files():
     headless=os.environ.get('HEADLESS', 'false').lower() == 'true',
     close_on_crash=False,
     profile="redbubble_profile",
-    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
     add_arguments=[
         "--no-sandbox",
         "--disable-dev-shm-usage",
@@ -381,7 +380,6 @@ def get_upload_files():
         "--no-default-browser-check",
         "--disable-popup-blocking",
         "--disable-software-rasterizer",
-        "--disable-blink-features=AutomationControlled",
     ],
 )
 def login_and_upload(driver: Driver, data):
