@@ -35,8 +35,8 @@ Clone the repository and run the automated dependency installer:
 
 ```bash
 # Clone the repo
-git clone https://github.com/yourusername/POD-Automation- Pilot.git
-cd POD-Automation-Pilot
+git clone https://github.com/saffta/Automation-Experiment.git
+cd Automation-Experiment
 
 # Install dependencies (Windows)
 install_dependencies.bat
@@ -60,6 +60,14 @@ PREFER_OLLAMA=true
 
 # SwarmUI API (Optional)
 SWARM_API_URL=http://localhost:7801
+```
+### 4. Fetch Cookies
+Redbubble requires you to store robust cookies for reliable future stealth. Run the below commands and log in manually - the script will automatically store your cookies.
+
+```env
+# Fetch Cookies
+cd Redbubble-Bot
+python fetch_cookies_manually.py
 ```
 
 ---
